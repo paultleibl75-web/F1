@@ -1,0 +1,983 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Liquid Glass Theme */
+  --bg-primary: #04070a;
+  --bg-panel: rgba(18, 24, 36, 0.75);
+  --bg-panel-hover: rgba(28, 38, 54, 0.85);
+  --bg-panel-raised: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --border-mid: rgba(255, 255, 255, 0.16);
+  --border-bright: rgba(255, 255, 255, 0.28);
+
+  --text-value: #ffffff;
+  --text-label: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.45);
+
+  /* Apple / F1 semantic accent colors */
+  --accent-green: #32D74B;
+  --accent-yellow: #FFD60A;
+  --accent-red: #FF453A;
+  --accent-cyan: #0A84FF;
+  --accent-blue: #0A84FF;
+  --accent-white: #ffffff;
+
+  /* F1 Tyre Colors */
+  --tyre-soft: #FF453A;
+  --tyre-medium: #FFD60A;
+  --tyre-hard: #ffffff;
+  --tyre-inter: #32D74B;
+  --tyre-wet: #0A84FF;
+
+  --font-ui: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Inter', system-ui, sans-serif;
+
+  --panel-radius: 18px;
+  --inner-radius: 12px;
+  --header-h: 58px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+  color: var(--text-value);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+button { cursor: pointer; border: none; background: none; font: inherit; color: inherit; }
+a { color: inherit; }
+
+/* ─── Layout Shell: Column 2 Full Height & Harmonized Proportions ────────────── */
+.pitwall-app {
+  display: grid;
+  /*
+   * Columns:
+   * Col 1: Leaderboard (350px)
+   * Col 2: Center Column (Track Map on top, compact Weather on bottom: minmax(560px, 1.25fr))
+   * Col 3: Live Cam (top) & Race Control (bottom) (310px, ~1/4 narrower)
+   * Col 4: Live Cam (top) & Telemetry (bottom) (380px, stays as it is)
+   *
+   * Rows:
+   * Row 1: Header (58px)
+   * Row 2: Top Panels (430px for 16:9 Cam)
+   * Row 3: Bottom Panels (1fr for RC & Telemetry)
+   */
+  grid-template-columns: 350px minmax(560px, 1.25fr) 310px 380px;
+  grid-template-rows: var(--header-h) 430px 1fr;
+  grid-template-areas:
+    "header   header   header  header"
+    "left     center   cam     cam"
+    "left     center   rc      telem";
+  height: 100vh;
+  gap: 12px;
+  padding: 12px;
+  background: radial-gradient(circle at 50% 0%, #162032 0%, #04070a 65%);
+}
+
+/* ─── Shared Panel Glass Effect ──────────────────────────────────────────────── */
+.panel, .pitwall-header {
+  background: var(--bg-panel);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--panel-radius);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────────── */
+.pitwall-header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 10;
+}
+
+.header-left { display: flex; align-items: center; gap: 24px; }
+.header-logo {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--accent-cyan);
+  padding-right: 24px;
+  border-right: 1px solid var(--border-mid);
+}
+
+.header-time { display: flex; flex-direction: column; }
+.header-time__label { font-size: 10px; color: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.header-time__value { font-size: 19px; font-weight: 800; color: var(--text-value); }
+
+.header-session { font-size: 15px; font-weight: 700; color: var(--text-value); letter-spacing: 0.02em; }
+
+.header-center { flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px; }
+
+.flag-pill {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 18px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(0,0,0,0.35);
+}
+.flag-pill__dot { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s infinite; }
+.flag-pill__sub { font-size: 11px; margin-left: 6px; font-weight: 700; opacity: 0.9; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.header-right { display: flex; align-items: center; gap: 18px; }
+.weather-quick { display: flex; flex-direction: column; font-size: 12px; font-weight: 600; color: var(--text-label); gap: 2px; }
+
+.playback-controls { display: flex; align-items: center; gap: 8px; background: var(--bg-panel-raised); padding: 4px; border-radius: 30px; }
+.ctrl-btn { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--text-label); transition: all 0.2s; }
+.ctrl-btn:hover { color: var(--text-value); }
+.ctrl-btn--active { background: var(--accent-cyan); color: #fff !important; }
+
+/* ─── Grid Placement Containers ──────────────────────────────────────────────── */
+.col-left   { grid-area: left;   display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.col-center { grid-area: center; display: flex; flex-direction: column; gap: 12px; overflow: hidden; min-height: 0; height: 100%; }
+.col-cam    { grid-area: cam;    display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.col-rc     { grid-area: rc;     display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.col-telem  { grid-area: telem;  display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+
+.panel {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.panel__title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-label);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.panel-empty { text-align: center; color: var(--text-muted); font-weight: 700; padding: 20px 0; font-size: 13px; }
+
+/* ─── Leaderboard (Continuous, 100% Mathematically Straight Flex Dividers) ────── */
+.leaderboard { height: 100%; padding: 16px 0; }
+.leaderboard .panel__title { padding: 0 16px 12px; }
+
+.lb-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-label);
+  font-weight: 700;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  width: 100%;
+}
+.lb-row:hover { background: var(--bg-panel-raised); }
+.lb-row--selected { background: rgba(10, 132, 255, 0.18) !important; }
+
+.lb-col-pos {
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--text-label);
+}
+
+.lb-col-driver {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-right: 6px;
+}
+
+.lb-team-stripe {
+  display: block;
+  width: 5px;
+  height: 32px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.lb-driver-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lb-driver__acronym {
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.lb-driver__team {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+  line-height: 1.1;
+}
+
+.lb-col-tyre {
+  width: 85px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.tyre-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; white-space: nowrap; }
+.tyre-pill__circle { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #000; flex-shrink: 0; }
+.tyre-pill__laps { font-size: 13px; font-weight: 800; opacity: 0.95; }
+
+.lb-col-gap {
+  width: 75px;
+  text-align: right;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.lb-gap--leader { color: var(--accent-green); font-size: 12px; font-weight: 900; }
+
+/* ─── Track Map (Vertically Expanded, Filling Column 2) ──────────────────────── */
+.col-center .track-map-panel {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.track-svg { width: 100%; height: 100%; display: block; }
+
+/* ─── Weather Panel (Vertically Halved ~85px, No Space Wasted) ───────────────── */
+.weather-panel--compact {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  gap: 8px;
+  height: auto;
+}
+
+.weather-compact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.weather-compact-header__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-label);
+}
+
+.weather-status-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid;
+  letter-spacing: 0.04em;
+}
+
+.weather-compact-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.weather-compact-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--bg-panel-raised);
+  padding: 6px 10px;
+  border-radius: var(--inner-radius);
+  border: 1px solid var(--border-subtle);
+}
+
+.weather-compact-metric__label {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text-label);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.weather-compact-metric__val {
+  font-size: 15px;
+  font-weight: 900;
+  display: flex;
+  align-items: baseline;
+}
+
+.weather-compact-rain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.weather-compact-rain__bar {
+  flex: 1;
+  height: 5px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.weather-compact-rain__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.weather-compact-rain__val {
+  white-space: nowrap;
+}
+
+/* ─── Race Control (Bottom Left, Under Cam: Narrower ~310px) ─────────────────── */
+.rc-panel { height: 100%; }
+.rc-scroll { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.rc-message { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--bg-panel-raised); border-radius: var(--inner-radius); font-size: 13px; font-weight: 600; border: 1px solid transparent; }
+.rc-message--urgent { background: rgba(255, 69, 58, 0.14); border-color: rgba(255, 69, 58, 0.35); }
+.rc-message__time { font-size: 11px; color: var(--text-label); font-weight: 700; margin-top: 1px; }
+
+.flag-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.06em; }
+.flag-badge--red    { background: rgba(255, 69, 58, 0.25); color: var(--accent-red); }
+.flag-badge--yellow { background: rgba(255, 214, 10, 0.25); color: var(--accent-yellow); }
+.flag-badge--green  { background: rgba(50, 215, 75, 0.25); color: var(--accent-green); }
+.flag-badge--blue   { background: rgba(10, 132, 255, 0.25); color: var(--accent-blue); }
+.flag-badge--white  { background: rgba(255, 255, 255, 0.25); color: var(--text-value); }
+
+/* ─── Telemetry Card (All-At-A-Glance: Zero Scrollbar, 380px) ────────────────── */
+.telemetry-card {
+  height: 100%;
+  overflow: hidden;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-sizing: border-box;
+}
+.telem-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  background: var(--bg-panel-raised);
+  border-radius: var(--inner-radius);
+  border-left: 4px solid;
+}
+.telem-header__pos { font-size: 22px; font-weight: 900; }
+.telem-header__info { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.telem-header__name { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.telem-header__team { font-size: 10px; font-weight: 700; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.telem-speed {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 17px 0;
+  justify-content: center;
+}
+.telem-speed__value {
+  font-size: 60px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.telem-speed__unit { font-size: 16px; font-weight: 800; color: var(--text-label); }
+
+.telem-row { display: flex; gap: 6px; }
+.telem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--bg-panel-raised);
+  padding: 6px 10px;
+  border-radius: var(--inner-radius);
+  box-sizing: border-box;
+}
+.telem-field--grow { flex: 1; margin-bottom: 0; }
+.telem-field__label { font-size: 9px; color: var(--text-label); font-weight: 800; text-transform: uppercase; display: flex; justify-content: space-between; }
+.telem-field__value { font-size: 13px; font-weight: 800; }
+.telem-field__value--large { font-size: 24px; font-weight: 900; text-align: center; line-height: 1.1; color: var(--accent-yellow); }
+
+.gauge-bar { height: 6px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; margin-top: 2px; }
+.gauge-bar__fill { height: 100%; border-radius: 4px; transition: width 0.15s linear; }
+
+.drs-pill { font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 10px; }
+.drs-pill--open { background: var(--accent-green); color: #000; }
+.drs-pill--closed { background: var(--bg-panel-raised); color: var(--text-label); }
+
+.telem-tyre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-panel-raised);
+  border-radius: var(--inner-radius);
+  border: 1px solid;
+}
+.tyre-circle { border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+.telem-tyre__compound { font-weight: 800; }
+.telem-tyre__laps { font-weight: 700; color: var(--text-label); margin-top: 1px; }
+
+/* ─── Driver Cam Panel (Narrower ~700px, 16:9 Flush Edge-to-Edge) ────────────── */
+.driver-cam-panel {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--panel-radius);
+  border: 1px solid var(--border-subtle);
+  background: #000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+.driver-cam__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(12, 18, 28, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  z-index: 10;
+  gap: 12px;
+  min-height: 46px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.driver-cam__driver-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: rgba(255, 69, 58, 0.25);
+  border: 1px solid rgba(255, 69, 58, 0.5);
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--accent-red);
+  letter-spacing: 0.06em;
+}
+
+.live-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  animation: pulse 1.2s infinite;
+}
+
+.driver-cam__tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.driver-cam__num {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.driver-cam__name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  color: #fff;
+}
+
+.driver-cam__team {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.driver-cam__cams {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.cam-tab {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--text-label);
+  background: rgba(255, 255, 255, 0.08);
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.cam-tab:hover {
+  color: var(--text-value);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cam-tab--active {
+  background: var(--accent-cyan) !important;
+  color: #fff !important;
+}
+
+.cam-tab--icon {
+  font-size: 13px;
+  padding: 4px 8px;
+}
+
+/* Flush Edge-To-Edge Video Viewport (No Gap between Border and Video) */
+.driver-cam__viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  display: block;
+}
+
+.driver-cam__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+.driver-cam__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(circle at center, transparent 72%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.driver-cam__url-modal {
+  position: absolute;
+  top: 38px;
+  left: 0;
+  right: 0;
+  padding: 8px 14px;
+  background: rgba(10, 15, 24, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.driver-cam__url-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #fff;
+}
+
+/* ─── Session Selector Overlay ────────────────────────────────────────────────── */
+.session-overlay { position: fixed; inset: 0; background: rgba(4, 7, 10, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.session-modal { background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: 24px; width: 620px; max-height: 90vh; padding: 40px; display: flex; flex-direction: column; gap: 32px; box-shadow: 0 24px 64px rgba(0,0,0,0.65); }
+.session-modal__logo { font-size: 34px; font-weight: 900; color: var(--text-value); text-align: center; }
+.session-modal__controls { display: flex; flex-direction: column; gap: 24px; }
+.form-group { display: flex; flex-direction: column; gap: 12px; }
+.form-label { font-size: 12px; font-weight: 800; color: var(--text-label); text-transform: uppercase; }
+.form-select { padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; background: var(--bg-panel-raised); border: 1px solid var(--border-subtle); }
+
+.type-tabs { display: flex; background: var(--bg-panel-raised); border-radius: 12px; padding: 4px; }
+.type-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 700; color: var(--text-label); border-radius: 8px; transition: all 0.2s; }
+.type-tab--active { background: var(--text-value); color: #000; }
+.type-tab--live { color: var(--accent-red); }
+.type-tab--live.type-tab--active { background: var(--accent-red); color: #fff; }
+
+.session-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; background: var(--bg-panel-raised); border-radius: 12px; padding: 8px; }
+.session-item { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 8px; transition: background 0.2s; font-size: 14px; font-weight: 700; }
+.session-item:hover { background: rgba(255,255,255,0.08); }
+.session-item--active { background: var(--accent-cyan) !important; color: #fff; }
+.session-item__name { flex: 1; }
+.session-item__date { font-size: 12px; opacity: 0.8; font-weight: 600; }
+
+.load-btn { width: 100%; padding: 16px; background: var(--text-value); color: #000; font-size: 16px; font-weight: 900; border-radius: 12px; transition: transform 0.1s; }
+.load-btn:active { transform: scale(0.98); }
+.load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Overlay styles */
+.loading-overlay, .error-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 999; }
+.loading-content { width: 420px; text-align: center; }
+.loading-title { font-size: 26px; font-weight: 900; margin-bottom: 20px; }
+.loading-step { font-size: 13px; font-weight: 700; color: var(--text-label); margin-bottom: 12px; }
+.loading-bar-track { height: 5px; background: var(--bg-panel-raised); border-radius: 3px; overflow: hidden; }
+.loading-bar-fill { height: 100%; background: var(--text-value); transition: width 0.3s ease-out; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.20); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE LAYOUT ENGINE (iPad, Tablets, Handys, Hochkant & Querformat)
+   Desktop (>= 1280px) bleibt zu 100% UNVERÄNDERT.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. iPad Landscape & Medium Screens (1024px – 1279px) ──────────────────── */
+@media (max-width: 1279px) and (min-width: 960px) {
+  .pitwall-app {
+    grid-template-columns: 290px minmax(360px, 1fr) 260px 310px;
+    grid-template-rows: var(--header-h) 360px 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+  .driver-cam-panel .driver-cam__bar {
+    padding: 6px 12px;
+  }
+}
+
+/* ─── 2. iPad / Tablet Portrait (Hochkant 768px – 1023px) ────────────────────── */
+@media (max-width: 1023px) and (min-width: 768px) {
+  html, body, #root {
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  .pitwall-app {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    grid-template-areas:
+      "header  header"
+      "cam     cam"
+      "left    center"
+      "rc      telem" !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: visible !important;
+    gap: 12px !important;
+    padding: 12px !important;
+  }
+
+  .pitwall-header {
+    height: auto !important;
+    min-height: 58px;
+    padding: 10px 16px;
+    border-radius: 16px;
+  }
+
+  /* Live-Cam takes full width 16:9 on Tablet Portrait */
+  .col-cam {
+    height: 400px !important;
+    min-height: 400px;
+  }
+
+  .col-left {
+    height: 560px !important;
+    min-height: 560px;
+  }
+
+  .col-center {
+    height: 560px !important;
+    min-height: 560px;
+  }
+
+  .col-rc {
+    height: 380px !important;
+    min-height: 380px;
+  }
+
+  .col-telem {
+    height: 380px !important;
+    min-height: 380px;
+  }
+
+  .session-modal {
+    width: 85vw !important;
+    max-width: 85vw !important;
+    padding: 30px !important;
+  }
+}
+
+/* ─── 3. Smartphones / Handys Hochkant (<= 767px) ────────────────────────────── */
+@media (max-width: 767px) {
+  html, body, #root {
+    height: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pitwall-app {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: visible !important;
+    padding: 8px !important;
+    gap: 10px !important;
+  }
+
+  /* Sticky Compact Mobile Header */
+  .pitwall-header {
+    position: sticky !important;
+    top: 6px;
+    z-index: 100;
+    padding: 8px 12px !important;
+    border-radius: 14px !important;
+    height: auto !important;
+    min-height: 52px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    order: 1;
+  }
+
+  .header-left {
+    gap: 10px !important;
+  }
+
+  .header-logo {
+    font-size: 15px !important;
+    padding-right: 10px !important;
+  }
+
+  .header-time__label {
+    font-size: 8px !important;
+  }
+  .header-time__value {
+    font-size: 15px !important;
+  }
+
+  .header-session {
+    display: none !important; /* Hide to prevent header blowout on small phone screens */
+  }
+
+  .header-center {
+    display: flex;
+    justify-content: center;
+    flex: 0;
+  }
+
+  .flag-pill {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    border-radius: 16px !important;
+  }
+  .flag-pill__dot {
+    width: 6px !important;
+    height: 6px !important;
+  }
+  .flag-pill__sub {
+    display: none !important;
+  }
+
+  .header-right .weather-quick {
+    display: none !important; /* Covered by dedicated weather panel */
+  }
+
+  .playback-controls {
+    gap: 4px !important;
+    padding: 3px !important;
+  }
+  .ctrl-btn {
+    padding: 5px 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* Natural Mobile Visual Order: Video -> Map & Weather -> Leaderboard -> Telemetry -> Race Control */
+  .col-cam {
+    order: 2 !important;
+    width: 100% !important;
+    height: 250px !important;
+    min-height: 250px;
+    border-radius: 16px !important;
+  }
+
+  .col-center {
+    order: 3 !important;
+    width: 100% !important;
+    height: auto !important;
+    gap: 10px !important;
+  }
+
+  .col-center .track-map-panel {
+    height: 340px !important;
+    min-height: 340px !important;
+    width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  .weather-panel--compact {
+    height: auto !important;
+    border-radius: 16px !important;
+    padding: 10px 12px !important;
+  }
+  .weather-compact-metrics {
+    gap: 6px !important;
+  }
+  .weather-compact-metric {
+    padding: 5px 8px !important;
+  }
+  .weather-compact-metric__label {
+    font-size: 8px !important;
+  }
+  .weather-compact-metric__val {
+    font-size: 12px !important;
+  }
+
+  .col-left {
+    order: 4 !important;
+    width: 100% !important;
+    height: 480px !important;
+    min-height: 480px;
+    border-radius: 16px !important;
+  }
+  .lb-row {
+    height: 48px !important;
+    padding: 0 10px !important;
+  }
+
+  .col-telem {
+    order: 5 !important;
+    width: 100% !important;
+    height: 380px !important;
+    min-height: 380px;
+    border-radius: 16px !important;
+  }
+
+  .col-rc {
+    order: 6 !important;
+    width: 100% !important;
+    height: 280px !important;
+    min-height: 280px;
+    border-radius: 16px !important;
+  }
+
+  /* Responsive Session Modal on Mobile */
+  .session-modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 94vh !important;
+    padding: 20px 14px !important;
+    gap: 16px !important;
+    border-radius: 20px !important;
+  }
+  .session-modal__logo {
+    font-size: 24px !important;
+  }
+  .session-modal__controls {
+    gap: 14px !important;
+  }
+  .type-tab {
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+  .session-item {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+    gap: 10px !important;
+  }
+  .load-btn {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ─── 4. Handys im Querformat (Mobile Landscape <= 932px, max-height 500px) ───── */
+@media (max-width: 932px) and (max-height: 500px) and (orientation: landscape) {
+  html, body, #root {
+    height: auto !important;
+    overflow-y: auto !important;
+  }
+
+  .pitwall-app {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    grid-template-areas:
+      "header header"
+      "cam    left"
+      "center telem"
+      "rc     telem" !important;
+    height: auto !important;
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  .col-cam    { height: 260px !important; }
+  .col-center { height: 320px !important; }
+  .col-left   { height: 320px !important; }
+  .col-telem  { height: 340px !important; }
+  .col-rc     { height: 220px !important; }
+}
