@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // Ensures assets load with relative paths on GitHub Pages and custom domains
+  base: process.env.NODE_ENV === 'production' ? '/F1/' : '/',
   server: {
     port: 5173,
     host: true,
